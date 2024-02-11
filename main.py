@@ -10,6 +10,7 @@ from phone_book import PhoneBook
 
 
 TIME_SLEEP = 0.8
+STANDARD_FILE = 'save_book'
 
 
 def clear():
@@ -41,7 +42,7 @@ def save_book(path_to: str, lst_phones: List[PhoneBook]):
                                                      'organisation_name': dict_phone.get('organisation_name'),
                                                      'phone_work': dict_phone.get('phone_work')}
     if path_to == '':
-        path_to = 'save_book'
+        path_to = STANDARD_FILE
     with open(f'saves/{path_to}.json', 'w', encoding='utf8') as save_file:
         json.dump(save_to, save_file, indent=3, ensure_ascii=False)
 
@@ -56,7 +57,7 @@ def load_book(path_to_file: str) -> List[PhoneBook]:
 
     lst_phones = []
     if path_to_file == '':
-        path_to_file = 'save_book.json'
+        path_to_file = f'{STANDARD_FILE}.json'
     try:
         with open(f'saves/{path_to_file}', encoding='utf8') as file:
             dict_phone = json.load(file)
@@ -213,11 +214,11 @@ def find_phone(lst_of_phones: List[PhoneBook]) -> None:
 
 
 if __name__ == '__main__':
-
+    print('Добро пожаловать в телефонную книгу!\n')
     lst_of_phones = []
 
     while True:
-        print('Добро пожаловать в телефонную книгу!\nУ вас доступны следующие команды:\n'
+        print('Вам доступны следующие команды:\n'
               '1. exit|e|esc|q|quit - выход из программы\n'
               '2. save - сохранить текущую телефонную книгу\n'
               '3. load - загрузить возможные телефонные книги\n'
@@ -258,6 +259,10 @@ if __name__ == '__main__':
                 frst_name = input('Введите имя или оставьте поле пустым: ')
                 srname = input('Введите отчество или оставьте поле пустым: ')
                 phn_personal = input('Введите личный (сотовый) номер: ')
+                if phn_personal == '' or len(phn_personal) < 11:
+                    print('Неверный ввод номера')
+                    sleep(TIME_SLEEP)
+                    continue
                 phn_personal = change_view_number(phn_personal)
                 phn_work = input('Введите рабочий номер или оставьте поле пустым: ')
                 org_name = input('Введите название организации или оставьте поле пустым: ')
@@ -266,15 +271,15 @@ if __name__ == '__main__':
                 print('Запись добавлена')
             case 'update':
                 print('Вы уже знаете индекс контакта, который хотите изменить? [Д/н?]')
-                check = input('Введите Д (да) или н (нет): ')
-                if check == 'н':
+                check = input('Введите Д (да) или н (нет): ').lower()
+                if check in ('н', 'нет', 'n', 'no', 'not'):
                     print('Вам нужна помощь с поиском? [Д/н?]')
-                    check = input('Введите Д (да) или н (нет): ')
-                    if check == 'н':
+                    check = input('Введите Д (да) или н (нет): ').lower()
+                    if check in ('н', 'нет', 'n', 'no', 'not'):
                         get_all_phones(lst_phones=lst_of_phones)
                     else:
                         find_phone(lst_of_phones)
-                number_of_phone = int(input('Введите номер контакта, который Вы хотите изменить: '))
+                number_of_phone = int(input('Введите индекс контакта, который Вы хотите изменить: '))
                 change_from = input('Введите, что Вы хотите изменить: ').lower()
                 change_to = input('Введите изменение: ')
                 match change_from:
@@ -284,10 +289,11 @@ if __name__ == '__main__':
                         lst_of_phones[number_of_phone - 1].first_name = change_to
                     case 'отчество':
                         lst_of_phones[number_of_phone - 1].surname = change_to
-                    case 'сотовый' | 'сотовый номер' | 'личный номер' | 'личный' | 'телефон':
+                    case 'сотовый' | 'сотовый номер' | 'личный номер' | 'личный' \
+                         | 'телефон' | 'номер' | 'номер сотовый':
                         change_to = change_view_number(change_to)
                         lst_of_phones[number_of_phone - 1].phone_personal = change_to
-                    case 'рабочий номер' | 'рабочий' | 'телефон рабочий':
+                    case 'рабочий номер' | 'рабочий' | 'номер рабочий' | 'телефон рабочий' | 'рабочий телефон':
                         lst_of_phones[number_of_phone - 1].phone_work = change_to
                     case 'имя организации' | 'организацию' | 'организация' | 'название организации':
                         lst_of_phones[number_of_phone - 1].organisation_name = change_to
