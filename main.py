@@ -11,6 +11,7 @@ from phone_book import PhoneBook
 
 TIME_SLEEP = 0.8
 
+
 def clear():
     """
     Очистка терминала
@@ -132,7 +133,7 @@ def get_all_phones(lst_phones: List[PhoneBook], main_list_phones: List[PhoneBook
 
         nav = input('Введите <, > или exit(e,q): ')
         match nav:
-            case 'exit' | 'e' | 'q':
+            case 'exit' | 'e' | 'q' | 'у' | 'й':
                 break
             case '>':
                 x_point = y_point if y_point != total_len else x_point
@@ -212,7 +213,9 @@ def find_phone(lst_of_phones: List[PhoneBook]) -> None:
 
 
 if __name__ == '__main__':
+
     lst_of_phones = []
+
     while True:
         print('Добро пожаловать в телефонную книгу!\nУ вас доступны следующие команды:\n'
               '1. exit|e|esc|q|quit - выход из программы\n'
