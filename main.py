@@ -92,21 +92,27 @@ def change_view_number(number: str) -> str:
     return number
 
 
-def get_all_phones(lst_phones: List[PhoneBook]) -> None:
+def get_all_phones(lst_phones: List[PhoneBook], main_list_phones: List[PhoneBook] | None = None) -> None:
     """
     Получение списка контактов в телефонной книге
-    :param lst_phones: список объектов телефонной книги
+    :param main_list_phones: список объектов телефонной книги без изменений
+    :param lst_phones: список объектов телефонной книги, который может подтвергаться изменениям
     :return: None
     """
 
+    total_len = len(lst_phones)
     x_point = 0
-    y_point = 10 if len(lst_phones) >= 10 else -1
-    total_page = len(lst_phones) // 10 + 1
+    y_point = 10 if total_len >= 10 else total_len
+    total_page = total_len // 10 + 1
     page = 1
+
+    if main_list_phones is None:
+        main_list_phones = lst_phones[:]
+
     while True:
         clear()
-        print(f'Текущая страница: {page} из {total_page}')
-        print('{}'.format('Индекс'),
+        print(f'Текущая страница: {page} из {total_page}, всего найдено: {total_len}')
+        print('{:<6}'.format('Индекс'),
               '{:^20}'.format('Фамилия'),
               '{:^20}'.format('Имя'),
               '{:^20}'.format('Отчество'),
@@ -116,7 +122,7 @@ def get_all_phones(lst_phones: List[PhoneBook]) -> None:
               sep='', end='\n')
         for phone in lst_phones[x_point:y_point]:
             dict_phone = phone.__dict__
-            print(f'{lst_phones.index(phone) + 1}. '
+            print('{:<6}'.format(f'{main_list_phones.index(phone) + 1}.'),
                   f'{dict_phone.get("last_name"):^20}'
                   f'{dict_phone.get("first_name"):^20}'
                   f'{dict_phone.get("surname"):^20}'
@@ -129,11 +135,11 @@ def get_all_phones(lst_phones: List[PhoneBook]) -> None:
             case 'exit' | 'e' | 'q':
                 break
             case '>':
-                x_point = y_point if y_point != -1 else x_point
-                y_point = y_point + 10 if (y_point + 10 <= len(lst_phones) and y_point != -1) else -1
+                x_point = y_point if y_point != total_len else x_point
+                y_point = y_point + 10 if (y_point + 10 <= total_len and y_point != total_len) else total_len
                 page = page + 1 if page + 1 <= total_page else page
             case '<':
-                y_point = x_point if x_point != 0 else 10
+                y_point = x_point if x_point != 0 else 10 if total_len >= 10 else total_len
                 x_point = x_point - 10 if x_point - 10 >= 0 else 0
                 page = page - 1 if page - 1 >= 1 else page
 
@@ -201,24 +207,8 @@ def find_phone(lst_of_phones: List[PhoneBook]) -> None:
         lst_to_find.append((count, phone))
 
     lst_to_find = sorted(lst_to_find, reverse=True, key=lambda x: x[0])
-    lst_phones = list(filter(lambda x: x[0] > 0, lst_to_find))
-    print('{}'.format('Индекс'),
-          '{:^20}'.format('Фамилия'),
-          '{:^20}'.format('Имя'),
-          '{:^20}'.format('Отчество'),
-          '{:^24}'.format('Личный (сотовый) номер'),
-          '{:^20}'.format('Рабочий номер'),
-          '{:^20}'.format('Название организации'),
-          sep='', end='\n')
-    for phone in lst_phones:
-        dict_phone = phone[1].__dict__
-        print(f'{lst_of_phones.index(phone[1]) + 1}. '
-              f'{dict_phone.get("last_name"):^20}'
-              f'{dict_phone.get("first_name"):^20}'
-              f'{dict_phone.get("surname"):^20}'
-              f'{dict_phone.get("phone_personal"):^24} '
-              f'{dict_phone.get("phone_work"):^20}'
-              f'{dict_phone.get("organisation_name"):^20}')
+    lst_phones = [i[1] for i in list(filter(lambda x: x[0] > 0, lst_to_find))]
+    get_all_phones(lst_phones=lst_phones, main_list_phones=lst_of_phones)
 
 
 if __name__ == '__main__':
@@ -259,7 +249,7 @@ if __name__ == '__main__':
                 clear()
             case 'read':
                 clear()
-                get_all_phones(lst_of_phones)
+                get_all_phones(lst_phones=lst_of_phones)
             case 'add':
                 lst_name = input('Введите фамилию или оставьте поле пустым: ')
                 frst_name = input('Введите имя или оставьте поле пустым: ')
@@ -278,7 +268,7 @@ if __name__ == '__main__':
                     print('Вам нужна помощь с поиском? [Д/н?]')
                     check = input('Введите Д (да) или н (нет): ')
                     if check == 'н':
-                        get_all_phones(lst_of_phones)
+                        get_all_phones(lst_phones=lst_of_phones)
                     else:
                         find_phone(lst_of_phones)
                 number_of_phone = int(input('Введите номер контакта, который Вы хотите изменить: '))
